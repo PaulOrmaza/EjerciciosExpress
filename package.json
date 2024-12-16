@@ -1,0 +1,22 @@
+{
+  "name": "ejercicioexpress",
+  "version": "1.0.0",
+  "description": "EJERCICIO CON LA LIBRERIA EXPRESS",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PaulOrmaza/EjerciciosExpress.git"
+  },
+  "author": "SPOJ",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PaulOrmaza/EjerciciosExpress/issues"
+  },
+  "homepage": "https://github.com/PaulOrmaza/EjerciciosExpress#readme",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
