@@ -63,49 +63,68 @@ app.get('/figura/circulo/:radio', (req, res) => {
 
 // 2. PENTÁGONO: Calcula el área y el perímetro del pentágono
 app.get('/figura/pentagono/:lado/:apotema', (req, res) => {
-    let lado = parseFloat(req.params.lado); // Longitud de un lado
-    let apotema = parseFloat(req.params.apotema); // Apotema del pentágono
+    // Reemplaza comas por puntos antes de convertir a número
+    let lado = parseFloat(req.params.lado.replace(',', '.')); 
+    let apotema = parseFloat(req.params.apotema.replace(',', '.')); 
 
-    if (lado > 0 && apotema > 0) { // Verifica que los parámetros sean positivos
-        let perimetro = 5 * lado; // Perímetro = 5 * lado
-        let area = (perimetro * apotema) / 2; // Área = (Perímetro * apotema) / 2
+    // Verifica que los valores sean números mayores a 0
+    if (lado > 0 && apotema > 0) {
+        let perimetro = 5 * lado; // Cálculo del perímetro
+        let area = (perimetro * apotema) / 2; // Cálculo del área
 
+        // Respuesta en formato JSON
         res.json({
             figura: 'Pentágono',
             lado: lado,
             apotema: apotema,
-            area: area.toFixed(2),
-            perimetro: perimetro.toFixed(2)
+            area: area.toFixed(2), // Redondeo a 2 decimales
+            perimetro: perimetro.toFixed(2) // Redondeo a 2 decimales
         });
     } else {
+        // Si los valores no son válidos, envía un error
         res.status(400).send('El lado y la apotema deben ser números mayores que 0');
     }
 });
 
+
 // 3. TRAPECIO ISÓSCELES: Calcula el área y el perímetro
 app.get('/figura/trapecio/:baseMayor/:baseMenor/:lado/:altura', (req, res) => {
-    let baseMayor = parseFloat(req.params.baseMayor); // Base mayor
-    let baseMenor = parseFloat(req.params.baseMenor); // Base menor
-    let lado = parseFloat(req.params.lado); // Lado del trapecio
-    let altura = parseFloat(req.params.altura); // Altura del trapecio
+    // Reemplaza comas por puntos antes de convertir a número
+    let baseMayor = parseFloat(req.params.baseMayor.replace(',', '.'));
+    let baseMenor = parseFloat(req.params.baseMenor.replace(',', '.'));
+    let lado = parseFloat(req.params.lado.replace(',', '.'));
+    let altura = parseFloat(req.params.altura.replace(',', '.'));
 
-    if (baseMayor > 0 && baseMenor > 0 && lado > 0 && altura > 0) { // Validación
-        let area = ((baseMayor + baseMenor) * altura) / 2; // Área = [(B + b) * h] / 2
-        let perimetro = baseMayor + baseMenor + 2 * lado; // Perímetro = B + b + 2 * lado
-
-        res.json({
-            figura: 'Trapecio Isósceles',
-            baseMayor: baseMayor,
-            baseMenor: baseMenor,
-            lado: lado,
-            altura: altura,
-            area: area.toFixed(2),
-            perimetro: perimetro.toFixed(2)
-        });
-    } else {
-        res.status(400).send('Las bases, lados y altura deben ser números mayores que 0');
+    // Validación de valores positivos
+    if (isNaN(baseMayor) || isNaN(baseMenor) || isNaN(lado) || isNaN(altura)) {
+        return res.status(400).send('Todos los parámetros deben ser números válidos.');
     }
+
+    if (baseMayor <= 0 || baseMenor <= 0 || lado <= 0 || altura <= 0) {
+        return res.status(400).send('Todos los parámetros (baseMayor, baseMenor, lado y altura) deben ser mayores que 0.');
+    }
+
+    // Validación geométrica: La base mayor debe ser mayor que la base menor
+    if (baseMayor <= baseMenor) {
+        return res.status(400).send('La base mayor debe ser mayor que la base menor.');
+    }
+
+    // Cálculos del área y perímetro
+    let area = ((baseMayor + baseMenor) * altura) / 2; // Área = [(B + b) * h] / 2
+    let perimetro = baseMayor + baseMenor + 2 * lado; // Perímetro = B + b + 2 * lado
+
+    // Respuesta en formato JSON
+    res.json({
+      
+        baseMayor: baseMayor,
+        baseMenor: baseMenor,
+        lado: lado,
+        altura: altura,
+        area: area.toFixed(2),
+        perimetro: perimetro.toFixed(2)
+    });
 });
+
 
 // Servidor escuchando en el puerto 3003
 app.listen(3003, () => {
