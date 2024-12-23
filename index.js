@@ -39,7 +39,6 @@ app.get('/suma/:n1', (req, res) => {
     res.send('El resultado de la suma es: ' + suma);
 });
 
-/* ----------------- NUEVAS FIGURAS GEOMÉTRICAS ----------------- */
 
 // 1. CÍRCULO: Calcula el área y el perímetro del círculo
 app.get('/figura/circulo/:radio', (req, res) => {
@@ -74,7 +73,7 @@ app.get('/figura/pentagono/:lado/:apotema', (req, res) => {
 
         // Respuesta en formato JSON
         res.json({
-            figura: 'Pentágono',
+            
             lado: lado,
             apotema: apotema,
             area: area.toFixed(2), // Redondeo a 2 decimales
@@ -124,6 +123,88 @@ app.get('/figura/trapecio/:baseMayor/:baseMenor/:lado/:altura', (req, res) => {
         perimetro: perimetro.toFixed(2)
     });
 });
+
+//CALCULO DE TRINOMIO CUADRADO PERFECTO
+
+app.get('/trinomio/:a/:b/:operador/:c/:x?', (req, res) => {
+    // Captura los parámetros y convierte a números
+    let a = parseFloat(req.params.a.replace(',', '.')); // Coeficiente a
+    let b = parseFloat(req.params.b.replace(',', '.')); // Coeficiente b
+    let operador = req.params.operador; // "+" o "-"
+    let c = parseFloat(req.params.c.replace(',', '.')); // Constante c
+    let x = req.params.x ? parseFloat(req.params.x.replace(',', '.')) : null; // Valor opcional para la ecuación
+
+    // Validaciones iniciales
+    if (isNaN(a) || isNaN(b) || isNaN(c)) {
+        return res.status(400).send('Los valores de "a", "b" y "c" deben ser números válidos.');
+    }
+
+    if (operador !== '+' && operador !== '-') {
+        return res.status(400).send('El operador debe ser "+" o "-".');
+    }
+
+    if (x !== null && isNaN(x)) {
+        return res.status(400).send('El valor de "x" debe ser un número válido si se incluye.');
+    }
+
+    // Cálculo del trinomio cuadrado perfecto
+    let aCuadrado = Math.pow(a, 2); // a^2
+    let bCuadrado = Math.pow(b, 2); // b^2
+    let dobleAB = 2 * a * b; // 2ab
+
+    // Resultado del trinomio cuadrado perfecto
+    let resultadoTrinomio = operador === '+' 
+        ? `${a}^2 + 2*${a}*${b} + ${b}^2 + ${c}`  // Desarrollo del trinomio
+        : `${a}^2 - 2*${a}*${b} + ${b}^2 + ${c}`; // Desarrollo del trinomio
+
+    // Expansión para mostrar la solución completa
+    let resultadoFinal = operador === '+' 
+        ? aCuadrado + dobleAB + bCuadrado + c  // (a + b)^2 + c
+        : aCuadrado - dobleAB + bCuadrado + c; // (a - b)^2 + c
+
+    let solucionEcuacion = null;
+    let ecuacion = null;
+
+    // Si x está presente, resolver la ecuación
+    if (x !== null) {
+        // Verificar si x - c es mayor o igual a cero para que se pueda aplicar la raíz cuadrada
+        let resultadoSinC = x - c;
+
+        // Si el resultado de x - c es negativo, no tiene solución real
+        if (resultadoSinC < 0) {
+            return res.status(400).send('No se puede resolver la ecuación: x debe ser mayor o igual a c.');
+        }
+
+        let raizResultado = Math.sqrt(resultadoSinC); // Raíz cuadrada del resultado
+
+        // Resolver la ecuación dependiendo del operador
+        solucionEcuacion = operador === '+' 
+            ? {
+                  posiblesValoresA: [`a = ${raizResultado - b}`, `a = ${-raizResultado - b}`],
+                  posiblesValoresB: [`b = ${raizResultado - a}`, `b = ${-raizResultado - a}`]
+              }
+            : {
+                  posiblesValoresA: [`a = ${raizResultado + b}`, `a = ${-raizResultado + b}`],
+                  posiblesValoresB: [`b = ${raizResultado + a}`, `b = ${-raizResultado + a}`]
+              };
+
+        // Construir la ecuación como cadena
+        ecuacion = `((${a} ${operador} ${b})^2 + ${c} = ${x})`;
+    }
+
+    // Respuesta JSON con el trinomio y, si corresponde, la solución de la ecuación
+    res.json({
+        trinomio: operador === '+' ? `(${a} + ${b})^2 + ${c}` : `(${a} - ${b})^2 + ${c}`,
+        desarrollo: operador === '+' 
+            ? `${a}^2 + 2*${a}*${b} + ${b}^2 + ${c}`
+            : `${a}^2 - 2*${a}*${b} + ${b}^2 + ${c}`,
+        resultadoTrinomio: resultadoTrinomio, // Ahora muestra el desarrollo del trinomio completo
+        resultadoFinal: resultadoFinal.toFixed(2), // El valor numérico final del trinomio
+        ecuacion: ecuacion, // Solo se muestra si hay un valor de x
+        solucionEcuacion: solucionEcuacion // Solo se muestra si hay un valor de x
+    });
+});
+
 
 
 // Servidor escuchando en el puerto 3003
